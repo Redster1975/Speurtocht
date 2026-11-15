@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schatkaart Avontuur</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f3d8;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #8B4513;
+}
+
+.location {
+    display: none;
+    background: white;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 700px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.active {
+    display: block;
+}
+
+input {
+    padding: 10px;
+    width: 200px;
+}
+
+button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.map {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🏴‍☠️ De Grote Schatzoektocht</h1>
+
+<img class="map" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Pirate_Map.svg/800px-Pirate_Map.svg.png">
+
+<div id="loc1" class="location active">
+<h2>📍 Locatie 1</h2>
+<p>
+Zoek de oudste boom van het park.
+Onder een steen vind je een code.
+</p>
+
+<input id="code1" placeholder="Voer code in">
+<button onclick="checkCode(1,'schat1')">Controleer</button>
+
+<p id="msg1"></p>
+</div>
+
+<div id="loc2" class="location">
+<h2>📍 Locatie 2</h2>
+<p>
+Goed gedaan! Wandel naar de rode brug.
+Zoek daar naar de volgende aanwijzing.
+</p>
+
+<input id="code2" placeholder="Voer code in">
+<button onclick="checkCode(2,'schat2')">Controleer</button>
+
+<p id="msg2"></p>
+</div>
+
+<div id="loc3" class="location">
+<h2>📍 Locatie 3</h2>
+<p>
+Je bent een echte speurneus!
+Ga nu naar de speeltuin en tel de schommels.
+</p>
+
+<input id="code3" placeholder="Voer code in">
+<button onclick="checkCode(3,'schat3')">Controleer</button>
+
+<p id="msg3"></p>
+</div>
+
+<div id="loc4" class="location">
+<h2>📍 Laatste Locatie</h2>
+<p>
+Bijna daar...
+Vind de schatkist en gebruik de laatste code.
+</p>
+
+<input id="code4" placeholder="Voer code in">
+<button onclick="checkCode(4,'eindschat')">Controleer</button>
+
+<p id="msg4"></p>
+</div>
+
+<div id="winner" class="location">
+<h2>🎉 GEFELICITEERD!</h2>
+
+<p>
+Je hebt alle locaties gevonden en de schat ontdekt!
+</p>
+
+<h1>🏆</h1>
+
+</div>
+
+<script>
+
+function checkCode(step, correctCode){
+
+    const code = document.getElementById("code"+step).value;
+
+    if(code === correctCode){
+
+        document.getElementById("msg"+step).innerHTML =
+            "✅ Correct!";
+
+        document.getElementById("loc"+step).classList.remove("active");
+
+        if(step < 4){
+            document.getElementById("loc"+(step+1))
+                    .classList.add("active");
+        }
+        else{
+            document.getElementById("winner")
+                    .classList.add("active");
+        }
+    }
+    else{
+        document.getElementById("msg"+step).innerHTML =
+            "❌ Onjuiste code";
+    }
+}
+</script>
+
+</body>
+</html>
