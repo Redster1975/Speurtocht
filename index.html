@@ -3,148 +3,284 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schatkaart Avontuur</title>
+<title>Sinterklaas Piraten Speurtocht</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f7f3d8;
-    text-align: center;
-    padding: 20px;
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#d5b47a;
 }
 
-h1 {
-    color: #8B4513;
+#map{
+    position:relative;
+    width:100%;
+    height:100vh;
+
+    background-image:url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1600');
+    background-size:cover;
+    background-position:center;
 }
 
-.location {
-    display: none;
-    background: white;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 700px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+.cross{
+    position:absolute;
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background:red;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:24px;
+    cursor:pointer;
+    box-shadow:0 0 15px rgba(0,0,0,0.5);
 }
 
-.active {
-    display: block;
+.locked{
+    opacity:.3;
+    pointer-events:none;
 }
 
-input {
-    padding: 10px;
-    width: 200px;
+.unlocked{
+    animation:pulse 2s infinite;
 }
 
-button {
-    padding: 10px 20px;
-    margin-left: 10px;
-    cursor: pointer;
+@keyframes pulse{
+    0% {transform:scale(1);}
+    50% {transform:scale(1.15);}
+    100% {transform:scale(1);}
 }
 
-.map {
-    width: 100%;
-    max-width: 600px;
-    border-radius: 10px;
+#popup{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    justify-content:center;
+    align-items:center;
+}
+
+.card{
+    width:90%;
+    max-width:500px;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    text-align:center;
+}
+
+input{
+    padding:10px;
+    width:80%;
+    margin:10px;
+}
+
+button{
+    padding:10px 20px;
+    background:#c00;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+#resultImage{
+    width:100%;
+    border-radius:10px;
+    margin-top:15px;
+    display:none;
+}
+
+#message{
+    font-size:20px;
+    font-weight:bold;
+    margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🏴‍☠️ De Grote Schatzoektocht</h1>
+<div id="map">
 
-<img class="map" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Pirate_Map.svg/800px-Pirate_Map.svg.png">
+<div class="cross unlocked" id="loc1" style="top:20%; left:20%;">❌</div>
+<div class="cross locked" id="loc2" style="top:35%; left:60%;">❌</div>
+<div class="cross locked" id="loc3" style="top:65%; left:25%;">❌</div>
+<div class="cross locked" id="loc4" style="top:45%; left:80%;">❌</div>
+<div class="cross locked" id="loc5" style="top:75%; left:70%;">❌</div>
 
-<div id="loc1" class="location active">
-<h2>📍 Locatie 1</h2>
-<p>
-Zoek de oudste boom van het park.
-Onder een steen vind je een code.
-</p>
-
-<input id="code1" placeholder="Voer code in">
-<button onclick="checkCode(1,'schat1')">Controleer</button>
-
-<p id="msg1"></p>
 </div>
 
-<div id="loc2" class="location">
-<h2>📍 Locatie 2</h2>
-<p>
-Goed gedaan! Wandel naar de rode brug.
-Zoek daar naar de volgende aanwijzing.
-</p>
+<div id="popup">
+  <div class="card">
 
-<input id="code2" placeholder="Voer code in">
-<button onclick="checkCode(2,'schat2')">Controleer</button>
+    <h2 id="title">Locatie</h2>
 
-<p id="msg2"></p>
-</div>
+    <p>Voer de geheime code in</p>
 
-<div id="loc3" class="location">
-<h2>📍 Locatie 3</h2>
-<p>
-Je bent een echte speurneus!
-Ga nu naar de speeltuin en tel de schommels.
-</p>
+    <input id="answer" type="text">
 
-<input id="code3" placeholder="Voer code in">
-<button onclick="checkCode(3,'schat3')">Controleer</button>
+    <br>
+    <button onclick="checkCode()">Controleer</button>
 
-<p id="msg3"></p>
-</div>
+    <div id="message"></div>
 
-<div id="loc4" class="location">
-<h2>📍 Laatste Locatie</h2>
-<p>
-Bijna daar...
-Vind de schatkist en gebruik de laatste code.
-</p>
+    <img id="resultImage">
 
-<input id="code4" placeholder="Voer code in">
-<button onclick="checkCode(4,'eindschat')">Controleer</button>
+    <br><br>
+    <button onclick="closePopup()">Sluiten</button>
 
-<p id="msg4"></p>
-</div>
-
-<div id="winner" class="location">
-<h2>🎉 GEFELICITEERD!</h2>
-
-<p>
-Je hebt alle locaties gevonden en de schat ontdekt!
-</p>
-
-<h1>🏆</h1>
-
+  </div>
 </div>
 
 <script>
 
-function checkCode(step, correctCode){
+let currentLocation = 0;
 
-    const code = document.getElementById("code"+step).value;
+const locations = [
+{
+code:"PEPERNOOT",
+nextPhoto:"https://picsum.photos/500/300?random=1",
+next:"loc2"
+},
+{
+code:"PAARD",
+nextPhoto:"https://picsum.photos/500/300?random=2",
+next:"loc3"
+},
+{
+code:"STOOMBOOT",
+nextPhoto:"https://picsum.photos/500/300?random=3",
+next:"loc4"
+},
+{
+code:"MIJTER",
+nextPhoto:"https://picsum.photos/500/300?random=4",
+next:"loc5"
+},
+{
+code:"PAKJESAVOND",
+nextPhoto:"",
+next:null
+}
+];
 
-    if(code === correctCode){
+let attempts = 3;
 
-        document.getElementById("msg"+step).innerHTML =
-            "✅ Correct!";
+document.querySelectorAll(".cross").forEach((cross,index)=>{
+    cross.addEventListener("click",()=>{
+        openLocation(index);
+    });
+});
 
-        document.getElementById("loc"+step).classList.remove("active");
+function openLocation(index){
+    currentLocation=index;
+    attempts=3;
 
-        if(step < 4){
-            document.getElementById("loc"+(step+1))
-                    .classList.add("active");
-        }
-        else{
-            document.getElementById("winner")
-                    .classList.add("active");
-        }
-    }
-    else{
-        document.getElementById("msg"+step).innerHTML =
-            "❌ Onjuiste code";
-    }
+    document.getElementById("popup").style.display="flex";
+    document.getElementById("title").innerText =
+    "Locatie " + (index+1);
+
+    document.getElementById("message").innerHTML="";
+    document.getElementById("resultImage").style.display="none";
+    document.getElementById("answer").value="";
+}
+
+function closePopup(){
+ document.getElementById("popup").style.display="none";
+}
+
+function horseSound(){
+ const audio = new SpeechSynthesisUtterance(
+ "Hiiiiii Hiiiiii"
+ );
+ speechSynthesis.speak(audio);
+}
+
+function fartSound(){
+ const audio = new SpeechSynthesisUtterance(
+ "Prrrrrrrt"
+ );
+ speechSynthesis.speak(audio);
+}
+
+function checkCode(){
+
+ let value =
+ document.getElementById("answer")
+ .value
+ .toUpperCase()
+ .trim();
+
+ let location = locations[currentLocation];
+
+ if(value === location.code){
+
+      horseSound();
+
+      const msg =
+      document.getElementById("message");
+
+      const img =
+      document.getElementById("resultImage");
+
+      if(currentLocation < 4){
+
+          msg.innerHTML =
+          "🐎 GOED!<br><br>Zoek nu deze locatie:";
+
+          img.src = location.nextPhoto;
+          img.style.display="block";
+
+          document
+          .getElementById(location.next)
+          .classList.remove("locked");
+
+          document
+          .getElementById(location.next)
+          .classList.add("unlocked");
+
+      } else {
+
+          msg.innerHTML =
+          `
+          <h2>🎉 GEFELICITEERD 🎉</h2>
+          <h3>Je hebt de zak van Sinterklaas gevonden!</h3>
+          🎁🎁🎁
+          `;
+
+      }
+
+ } else {
+
+      attempts--;
+
+      fartSound();
+
+      if(attempts > 0){
+
+          document.getElementById("message")
+          .innerHTML=
+          `
+          😢 Huilende Piet<br><br>
+          Foute code!<br>
+          Nog ${attempts} pogingen.
+          `;
+
+      }
+      else{
+
+          document.getElementById("message")
+          .innerHTML=
+          `
+          😭 Piet weet het ook niet meer!<br><br>
+          Tip: kijk nog eens goed rond.
+          `;
+      }
+
+ }
+
 }
 </script>
 
